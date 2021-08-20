@@ -1,1 +1,2 @@
-# PublicKeyRecoveryECDSA
+## ECDSA Public Key Recovery in BitClout
+This developer-friendly walkthrough explains the proposed signature scheme to support derived keys on the BitClout blockchain. The `main()` method in `main.go` file contains the documentation and code that explains how the signature scheme works. `main.go` is self-contained and can even be run on e.g. `https://play.golang.org/` to verify its correctness.
