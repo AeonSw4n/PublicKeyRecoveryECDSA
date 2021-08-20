@@ -11,15 +11,13 @@ import (
 )
 
 func main(){
-	// In this code, we will use the privateKey to sign a simple test message.
-	// We will then attempt to verify the signature using the realPublic key,
+	// In this code, we will use the privateKey to sign a sample test message.
+	// We will then attempt to verify the signature using the realPublicKey,
 	// which is the public key associated with the privateKey. Then, we
 	// use another, "unrelated" public key - recoveredPublicKey - to see that
 	// it also passes the signature verification.
-	// That's because for any signature, there are at most 4 public keys that would pass
-	// signature verification (although it is very unlikely there will be more than 2).
-	// This stems from a property of ECDSA signatures. Later, I will explain how we
-	// use this fact in public key recovery in BitClout derived signatures.
+	// Based on this observation, we will describe a proposed signature scheme to
+	// support derived keys on the BitClout blockchain.
 	// Let's see this in action:
 	privateKeyBase58Check := "tbc31669t2YuZ2mi1VLtK6a17RXFPdsuBDcenPLc1eU1ZVRHF9Zv4"
 	realPublicKeyBase58Check := "tBCKXFJEDSF7Thcc6BUBcB6kicE5qzmLbAtvFf9LfKSXN4LwFt36oX"
@@ -70,31 +68,37 @@ func main(){
 		panic("Error: failed verifying signature with recovered public key")
 	}
 
+	// As we can see, recovered public key passed signature verification.
+	// This happened because for any signature, there are at most 4 public keys that would pass
+	// signature verification (although it is very unlikely there will be more than 2).
+	// This stems from a property of ECDSA signatures. I will now explain how we
+	// use this fact in public key recovery in BitClout derived key signatures.
+
 	fmt.Println("Yup, there are more than one valid public key per signature.")
 
-	// As we can see, recovered public key passed signature verification.
-	// This public key has been recovered from the {r, s} pair of the signature,
-	// with a recovery parameter, called iteration, which conveniently is a 2-bit
-	// number between 0-3. The real public key represents a different iteration.
+	// The recovered public key has been extracted from the {r, s} pair of the signature.
+	// To do this we've done some math using a special parameter, called iteration, which
+	// is a 2-bit number between 0-3. The real public key represents a different iteration
+	// value applied to {r, s} than the recovered public key.
 	// The standard way to encode a {r, s} ecdsa signature is a DER format which is:
 	// 0x30 <length of whole message> <0x02> <length of R> <R> 0x2 <length of S> <S>.
 	// The 0x30 control byte, or 48 in base-10, is static and doesn't affect the signature.
-	// When using DER format, we're losing the information about iteration. To make
+	// When using DER format, we're not encoding the information about iteration. To make
 	// up for this, we would transmit the signer public key together with the signature.
 	// However, there is another signature format, known as Compact Format, which includes
 	// the iteration information in the signature encoding:
 	// < byte of 27 + iteration >< padded bytes for signature R><padded bytes for signature S>
-	// The computation of the iteration is pushed on the signer, and the verifier recovers the public
-	// key based on this information. It is important to compare this recovered public key
+	// The computation of the correct iteration is pushed on the signer, and the verifier recovers
+	// the public key based on this information. It is important to compare this recovered public key
 	// with an existing key certificate, or in our case, the derived key entry.
-	// In BitClout txns, we've store all signatures in DER format, so switching to
+	// In BitClout txns, we've stored all signatures in DER format, so switching to
 	// the Compact format isn't feasible. On the other hand, we could merge these two encodings
 	// into our custom encoding that support both owner and derived key signed transactions.
 	// The proposed format is:
 	// <0x30 + [(1 + iteration) if derived]> <length of whole message> <0x02> <length of R> <R> 0x2 <length of S> <S>.
 	// This way signature tells us if message was used with derived key and which key was used.
-	// So we don't need to transmit any information about the derived key used to sign a message,
-	// the MsgBitCloutTxn, will look identical to a regular
+	// So we don't need to transmit any information about the derived key used to sign a message.
+	// The MsgBitCloutTxn signed by a derived public key will look identical to the one signed with owner public key.
 	// References:
 	// This is inspired by section 4.1.6 of SEC 1 Ver 2.0, page 47-48 (53 and 54 in the pdf):
 	// https://www.secg.org/sec1-v2.pdf
