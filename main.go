@@ -96,7 +96,7 @@ func main(){
 	// into our custom encoding that support both owner and derived key signed transactions.
 	// The proposed format is:
 	// <0x30 + [(1 + iteration) if derived]> <length of whole message> <0x02> <length of R> <R> 0x2 <length of S> <S>.
-	// This way signature tells us if message was used with derived key and which key was used.
+	// This way signature tells us if message was signed with derived key and which key was used.
 	// So we don't need to transmit any information about the derived key used to sign a message.
 	// The MsgBitCloutTxn signed by a derived public key will look identical to the one signed with owner public key.
 	// References:
