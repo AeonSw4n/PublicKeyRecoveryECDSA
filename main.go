@@ -29,10 +29,11 @@ func main(){
 	// We will then attempt to verify the signature using the realPublicKey,
 	// which is the public key associated with the privateKey. Then, we
 	// use another, "unrelated" public key - recoveredPublicKey - to see that
-	// it also passes the signature verification.
-	// Based on this observation, we will describe a proposed signature scheme to
-	// support derived keys on the BitClout blockchain.
-	// Let's see this in action:
+	// it also passes the signature verification. This will show that there
+	// is are always multiple public key passing signature verification.
+	// This observation is helpful, because it gives context to the later described
+	// public key recovery. It will also prove that the proposed signature scheme
+	// for derived keys on the BitClout blockchain is secure. Let's see this in action:
 	privateKeyBase58Check := "tbc31669t2YuZ2mi1VLtK6a17RXFPdsuBDcenPLc1eU1ZVRHF9Zv4"
 	realPublicKeyBase58Check := "tBCKXFJEDSF7Thcc6BUBcB6kicE5qzmLbAtvFf9LfKSXN4LwFt36oX"
 	recoveredPublicKeyBase58Check := "tBCKYQieeL52ocrVptetL8xvYBBSSL6infjaU7kxDEogogNo2etx2c"
@@ -83,8 +84,8 @@ func main(){
 	}
 
 	// As we can see, recovered public key passed signature verification.
-	// This happened because for any signature, there are at most 4 public keys that would pass
-	// signature verification (although it is very unlikely there will be more than 2).
+	// This happened because for any signature, there are at most 4 public keys that could
+	// produce a given signature (although it is very unlikely there will be more than 2).
 	// This stems from a property of ECDSA signatures. I will now explain how we
 	// use this fact in public key recovery in BitClout derived key signatures.
 
@@ -103,14 +104,14 @@ func main(){
 	// the iteration information in the signature encoding:
 	// < byte of 27 + iteration >< padded bytes for signature R><padded bytes for signature S>
 	// The computation of the correct iteration is pushed on the signer, and the verifier recovers
-	// the public key based on this information. It is important to compare this recovered public key
-	// with an existing key certificate, or in our case, the derived key entry.
+	// the public key based on the sig first byte information. It is important to compare this recovered
+	// public key with an existing key certificate, or in our case, the derived key entry.
 	// In BitClout txns, we've stored all signatures in DER format, so switching to
 	// the Compact format isn't feasible. On the other hand, we could merge these two encodings
-	// into our custom encoding that support both owner and derived key signed transactions.
+	// into our custom encoding that supports both owner and derived key signed transactions.
 	// The proposed format is:
 	// <0x30 + [(1 + iteration) if derived]> <length of whole message> <0x02> <length of R> <R> 0x2 <length of S> <S>.
-	// This way signature tells us if message was signed with derived key and which key was used.
+	// This way signature tells us if message was signed with a an owner or with a derived key, and if so which key was used.
 	// So we don't need to transmit any information about the derived key used to sign a message.
 	// The MsgBitCloutTxn signed by a derived public key will look identical to the one signed with owner public key.
 
