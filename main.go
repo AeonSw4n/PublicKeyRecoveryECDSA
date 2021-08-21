@@ -10,6 +10,20 @@ import (
 	"reflect"
 )
 
+// References:
+// The code below is inspired by section 4.1.6 of SEC 1 Ver 2.0, page 47-48 (53 and 54 in the pdf):
+// 	https://www.secg.org/sec1-v2.pdf
+// As well as Pieter Wuille's work in Bitcoin, here is the original thread:
+// 	https://bitcointalk.org/index.php?topic=6430.msg93940#msg93940
+// And here's another post from this thread about benchmarking:
+// 	https://bitcointalk.org/index.php?topic=6430.msg100334#msg100334
+// And here's his code in bitcoin-core gh on public key recovery:
+// 	https://github.com/bitcoin-core/secp256k1/blob/master/src/modules/recovery/main_impl.h
+// Here is another thread about this, which explains how recovery works:
+// 	https://crypto.stackexchange.com/questions/18105/how-does-recovering-the-public-key-from-an-ecdsa-signature-work
+// We're also in luck because btcsuite/btcec has fully implemented public key recovery from ecdsa:
+// 	https://github.com/btcsuite/btcd/blob/b3e6b/btcec/signature.go#L417
+
 func main(){
 	// In this code, we will use the privateKey to sign a sample test message.
 	// We will then attempt to verify the signature using the realPublicKey,
@@ -99,19 +113,6 @@ func main(){
 	// This way signature tells us if message was signed with derived key and which key was used.
 	// So we don't need to transmit any information about the derived key used to sign a message.
 	// The MsgBitCloutTxn signed by a derived public key will look identical to the one signed with owner public key.
-	// References:
-	// This is inspired by section 4.1.6 of SEC 1 Ver 2.0, page 47-48 (53 and 54 in the pdf):
-	// https://www.secg.org/sec1-v2.pdf
-	// As well as Pieter Wuille's work in Bitcoin, here is the original thread:
-	// https://bitcointalk.org/index.php?topic=6430.msg93940#msg93940
-	// And here's another post from this thread about benchmarking:
-	// https://bitcointalk.org/index.php?topic=6430.msg100334#msg100334
-	// And here's his code in bitcoin-core gh on public key recovery:
-	// https://github.com/bitcoin-core/secp256k1/blob/master/src/modules/recovery/main_impl.h
-	// Here is another thread about this, which explains how recovery works:
-	// https://crypto.stackexchange.com/questions/18105/how-does-recovering-the-public-key-from-an-ecdsa-signature-work
-	// We're also in luck because btcsuite/btcec has fully implemented public key recovery from ecdsa:
-	// https://github.com/btcsuite/btcd/blob/b3e6b/btcec/signature.go#L417
 
 	// Below we will show how we can use this new signature encoding to
 	// verify signatures in BitClout. First we sign the message and encode
