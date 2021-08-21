@@ -29,8 +29,8 @@ func main(){
 	// We will then attempt to verify the signature using the realPublicKey,
 	// which is the public key associated with the privateKey. Then, we
 	// use another, "unrelated" public key - recoveredPublicKey - to see that
-	// it also passes the signature verification. This will show that there
-	// is are always multiple public key passing signature verification.
+	// it also passes the signature verification. This shows that there
+	// are always multiple public keys passing signature verification.
 	// This observation is helpful, because it gives context to the later described
 	// public key recovery. It will also prove that the proposed signature scheme
 	// for derived keys on the BitClout blockchain is secure. Let's see this in action:
